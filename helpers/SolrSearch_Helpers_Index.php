@@ -93,14 +93,31 @@ class SolrSearch_Helpers_Index
         $doc->setField('assyr_collection', $publisher);  
 
         // Sous-collection : toutes les DC:Provenance ne commencant pas par "Acquisition history :"
-        $provenances = metadata($item, array('Dublin Core', 'Provenance'), array('all' => true));
+        $values = metadata($item, array('Dublin Core', 'Provenance'), array('all' => true));
         $prefix = "Acquisition history :";
-        foreach($provenances as $provenance) {
-            if (substr($provenance, 0, strlen($prefix)) != $prefix) {
+        foreach($values as $value) {
+            if (substr($value, 0, strlen($prefix)) != $value) {
                 $doc->setField('assyr_souscollection', trim(ucfirst($provenance)));  
             }
         }
 
+        // Période historique : toutes les DC:Temporal Coverage ne commencant pas par "Acquisition history :"
+        $values = metadata($item, array('Dublin Core', 'Temporal Coverage'), array('all' => true));
+        $prefix = "Period remarks :";
+        foreach($values as $value) {
+            if (substr($value, 0, strlen($prefix)) != $prefix) {
+                $doc->setField('assyr_periode', trim(ucfirst($value)));  
+            }
+        }
+
+        // Aire géographique : toutes les DC:Spatial Coverage qui ne commencant pas par "Provenience remarks :"
+        $values = metadata($item, array('Dublin Core', 'Spatial Coverage'), array('all' => true));
+        $prefix = "Provenience remarks :";
+        foreach($values as $value) {
+            if (substr($value, 0, strlen($prefix)) != $prefix) {
+                $doc->setField('assyr_aire', trim(ucfirst($value)));  
+            }
+        }
 
         // extend $doc to to include and items public / private status
         $doc->setField('public', $item->public);
