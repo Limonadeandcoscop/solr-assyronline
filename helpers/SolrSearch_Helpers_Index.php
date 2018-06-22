@@ -97,7 +97,7 @@ class SolrSearch_Helpers_Index
         $prefix = "Acquisition history :";
         foreach($values as $value) {
             if (substr($value, 0, strlen($prefix)) != $value) {
-                $doc->setField('assyr_souscollection', trim(ucfirst($provenance)));  
+                $doc->setField('assyr_souscollection', trim(ucfirst($value)));  
             }
         }
 
@@ -117,6 +117,32 @@ class SolrSearch_Helpers_Index
             if (substr($value, 0, strlen($prefix)) != $prefix) {
                 $doc->setField('assyr_aire', trim(ucfirst($value)));  
             }
+        }
+
+        // Matériau : toutes les DC:Medium
+        $value = metadata($item, array('Dublin Core', 'Medium'));
+        if (strlen(trim($value))) {
+            $doc->setField('assyr_materiau', trim(ucfirst($value)));  
+        }
+
+        // Hauteur : toutes les DC:Format qui commencent par "Height :"
+        $values = metadata($item, array('Dublin Core', 'Format'), array('all' => true));
+        foreach($values as $value) {
+
+            $prefix = 'Height :';
+            if (substr($value, 0, strlen($prefix)) == $prefix) {
+                $doc->setField('assyr_hauteur', trim(ucfirst(str_replace($prefix, '', $value))));  
+            } 
+
+            $prefix = 'Width :';
+            if (substr($value, 0, strlen($prefix)) == $prefix) {
+                $doc->setField('assyr_diametre', trim(ucfirst(str_replace($prefix, '', $value))));  
+            } 
+
+            $prefix = 'Weight :';
+            if (substr($value, 0, strlen($prefix)) == $prefix) {
+                $doc->setField('assyr_poids', trim(ucfirst(str_replace($prefix, '', $value))));  
+            } 
         }
 
         // extend $doc to to include and items public / private status
