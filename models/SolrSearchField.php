@@ -148,7 +148,12 @@ class SolrSearchField extends Omeka_Record_AbstractRecord
             case 'resulttype':  return __('Result Type');
             case 'featured':    return __('Featured');
 
-            default: return $this->getElement()->name;
+            default: 
+                if (substr($this->slug, 0, 6) == 'assyr_') {
+                    return $this->slug;
+                } 
+                    return $this->getElement()->name;
+                break;
 
         }
     }
