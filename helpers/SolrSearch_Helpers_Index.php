@@ -86,6 +86,22 @@ class SolrSearch_Helpers_Index
         $doc->setField('model', 'Item');
         $doc->setField('modelid', $item->id);
 
+        /*** Facettes Assyr ***/
+
+        // Collection : le champ DC:Publisher
+        $publisher = metadata($item, array('Dublin Core', 'Publisher'));
+        $doc->setField('assyr_collection', $publisher);  
+
+        // Sous-collection : toutes les DC:Provenance ne commencant pas par "Acquisition history :"
+        $provenances = metadata($item, array('Dublin Core', 'Provenance'), array('all' => true));
+        $prefix = "Acquisition history :";
+        foreach($provenances as $provenance) {
+            if (substr($provenance, 0, strlen($prefix)) != $prefix) {
+                $doc->setField('assyr_souscollection', trim(ucfirst($provenance)));  
+            }
+        }
+
+
         // extend $doc to to include and items public / private status
         $doc->setField('public', $item->public);
 
