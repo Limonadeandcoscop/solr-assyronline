@@ -129,7 +129,8 @@ class SolrSearch_Helpers_Facet
     public static function keyToLabel($key)
     {
         $fields = get_db()->getTable('SolrSearchField');
-        return $fields->findBySlug(str_replace('_s', '', $key))->label;
+        $key = preg_replace('/_s$/', '', $key);
+        return $fields->findBySlug($key)->label;
     }
 
 
