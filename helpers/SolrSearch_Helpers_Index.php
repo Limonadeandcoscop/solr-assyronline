@@ -125,7 +125,7 @@ class SolrSearch_Helpers_Index
             $doc->setField('assyr_materiau', trim(ucfirst($value)));  
         }
 
-        // Hauteur : toutes les DC:Format qui commencent par "Height :"
+        // Hauteur, diamètre et poids : toutes les DC:Format qui commencent par "Height :", "Width :" et "Weight :"
         $values = metadata($item, array('Dublin Core', 'Format'), array('all' => true));
         foreach($values as $value) {
 
@@ -144,6 +144,20 @@ class SolrSearch_Helpers_Index
                 $doc->setField('assyr_poids', trim(ucfirst(str_replace($prefix, '', $value))));  
             } 
         }
+
+        // Thème iconographique : tous les DC:Subject qui commencent par "Subgenre remarks :"
+        // Mots clés : tous les DC:Subject qui ne commencent pas par "Subgenre remarks :"
+        $values = metadata($item, array('Dublin Core', 'Subject'), array('all' => true));
+        $prefix = "Subgenre remarks :";
+        foreach($values as $value) {
+            if (substr($value, 0, strlen($prefix)) == $prefix) {
+                $doc->setField('assyr_icono', trim(ucfirst(str_replace($prefix, '', $value))));  
+            } else {
+                $doc->setField('assyr_motscles', trim(ucfirst($value)));  
+            }
+        }
+        
+
 
         // extend $doc to to include and items public / private status
         $doc->setField('public', $item->public);
