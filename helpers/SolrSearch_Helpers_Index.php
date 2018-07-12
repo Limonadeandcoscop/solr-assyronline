@@ -96,7 +96,7 @@ class SolrSearch_Helpers_Index
         $values = metadata($item, array('Dublin Core', 'Provenance'), array('all' => true));
         $prefix = "Acquisition history :";
         foreach($values as $value) {
-            if (substr($value, 0, strlen($prefix)) != $value) {
+            if (substr($value, 0, strlen($prefix)) != $prefix) {
                 $doc->setField('assyr_souscollection', trim(ucfirst($value)));  
             }
         }
