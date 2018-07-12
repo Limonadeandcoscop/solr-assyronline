@@ -101,12 +101,12 @@ class SolrSearch_Helpers_Index
             }
         }
 
-        // Période historique : toutes les DC:Temporal Coverage ne commencant pas par "Acquisition history :"
+        // Période historique : toutes les DC:Temporal Coverage qui commencent par "Period remarks :"
         $values = metadata($item, array('Dublin Core', 'Temporal Coverage'), array('all' => true));
         $prefix = "Period remarks :";
         foreach($values as $value) {
-            if (substr($value, 0, strlen($prefix)) != $prefix) {
-                $doc->setField('assyr_periode', trim(ucfirst($value)));  
+            if (substr($value, 0, strlen($prefix)) == $prefix) {
+                $doc->setField('assyr_periode',  trim(ucfirst(str_replace($prefix, '', $value))));  
             }
         }
 
