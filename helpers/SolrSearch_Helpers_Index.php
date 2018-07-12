@@ -153,7 +153,7 @@ class SolrSearch_Helpers_Index
             if (substr($value, 0, strlen($prefix)) == $prefix) {
                 $doc->setField('assyr_icono', trim(ucfirst(str_replace($prefix, '', $value))));  
             } else {
-                $doc->setField('assyr_motscles', trim(ucfirst($value)));  
+                $doc->setMultiValue('assyr_motscles', trim(ucfirst($value)));  
             }
         }
         
