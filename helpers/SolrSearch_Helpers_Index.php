@@ -110,12 +110,12 @@ class SolrSearch_Helpers_Index
             }
         }
 
-        // Aire géographique : toutes les DC:Spatial Coverage qui ne commencant pas par "Provenience remarks :"
+        // Aire géographique : toutes les DC:Spatial Coverage qui commencant par "Provenience remarks :"
         $values = metadata($item, array('Dublin Core', 'Spatial Coverage'), array('all' => true));
         $prefix = "Provenience remarks :";
         foreach($values as $value) {
-            if (substr($value, 0, strlen($prefix)) != $prefix) {
-                $doc->setField('assyr_aire', trim(ucfirst($value)));  
+            if (substr($value, 0, strlen($prefix)) == $prefix) {
+                $doc->setField('assyr_aire',  trim(ucfirst(str_replace($prefix, '', $value))));  
             }
         }
 
