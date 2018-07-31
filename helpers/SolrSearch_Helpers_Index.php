@@ -77,7 +77,6 @@ class SolrSearch_Helpers_Index
      **/
     public static function itemToDocument($item)
     {
-
         $fields = get_db()->getTable('SolrSearchField');
 
         $doc = new Apache_Solr_Document();
@@ -131,18 +130,120 @@ class SolrSearch_Helpers_Index
 
             $prefix = 'Height :';
             if (substr($value, 0, strlen($prefix)) == $prefix) {
-                $doc->setField('assyr_hauteur', trim(ucfirst(str_replace($prefix, '', $value))));  
+
+                // Formatte la valeur
+                $value = trim(ucfirst(str_replace($prefix, '', $value)));
+                $value = trim(str_replace(' mm', '', $value));
+
+                // Gère les intervals
+                if (is_numeric($value)) {
+                    $interval = null;
+                    if ($value >= 0 && $value <= 9) {
+                        $interval = "1-9 mm";
+                    } elseif ($value >= 10 && $value <= 19) {
+                        $interval = "10-19 mm";
+                    } elseif ($value >= 20 && $value <= 29) {
+                        $interval = "20-29 mm";
+                    } elseif ($value >= 30 && $value <= 49) {
+                        $interval = "30-49 mm";
+                    } elseif ($value >= 50 && $value <= 55) {
+                        $interval = "50-55 mm";
+                    } elseif ($value >= 55 ) {
+                        $interval = "> 55mm";
+                    }
+                    $doc->setField('assyr_hauteur', $interval);  
+                } else {
+                    echo "Erreur lors de l'indexation  : \"<b>".$value."</b>\" est une hauteur invalide (<a target='_blank' href='".admin_url('/items/show/'.$item->id)."'>sceau #$item->id</a>)<br />";
+                }
             } 
 
             $prefix = 'Width :';
             if (substr($value, 0, strlen($prefix)) == $prefix) {
-                $doc->setField('assyr_diametre', trim(ucfirst(str_replace($prefix, '', $value))));  
+
+                $value = trim(ucfirst(str_replace($prefix, '', $value)));
+                $value = trim(str_replace(' mm', '', $value));
+
+                if (is_numeric($value)) {
+                    $interval = null;
+                    if ($value >= 4 && $value <= 9) {
+                        $interval = "4-9 mm";
+                    } elseif ($value >= 10 && $value <= 14) {
+                        $interval = "10-14 mm";
+                    } elseif ($value >= 15 && $value <= 19) {
+                        $interval = "15-19 mm";
+                    } elseif ($value >= 20 && $value <= 24) {
+                        $interval = "20-24 mm";
+                    } elseif ($value >= 25 && $value <= 29) {
+                        $interval = "25-29 mm";                        
+                    } elseif ($value >= 30 && $value <= 34) {
+                        $interval = "30-34 mm";                                                
+                    } elseif ($value >= 34 ) {
+                        $interval = "> 34mm";
+                    }
+                    $doc->setField('assyr_diametre', $interval);
+                } else {
+                    echo "Erreur lors de l'indexation  : \"<b>".$value."</b>\" est une largeur invalide (<a target='_blank' href='".admin_url('/items/show/'.$item->id)."'>sceau #$item->id</a>)<br />";
+                }
+                
             } 
 
             $prefix = 'Weight :';
             if (substr($value, 0, strlen($prefix)) == $prefix) {
-                $doc->setField('assyr_poids', trim(ucfirst(str_replace($prefix, '', $value))));  
+
+                $value = trim(ucfirst(str_replace($prefix, '', $value)));
+                $value = trim(str_replace('g', '', $value));
+
+                if (is_numeric($value)) {
+                    $interval = null;
+                    if ($value >= 1 && $value <= 9) {
+                        $interval = "1-9 g";
+                    } elseif ($value >= 10 && $value <= 19) {
+                        $interval = "10-19 g";
+                    } elseif ($value >= 20 && $value <= 29) {
+                        $interval = "20-29 g";
+                    } elseif ($value >= 30 && $value <= 39) {
+                        $interval = "30-39 g";
+                    } elseif ($value >= 40 && $value <= 49) {
+                        $interval = "40-49 g";                        
+                    } elseif ($value >= 50 && $value <= 59) {
+                        $interval = "50-59 g";                                                
+                    } elseif ($value >= 60 && $value <= 80) {
+                        $interval = "60-80 g";                                                                        
+                    } elseif ($value >= 81 ) {
+                        $interval = "> 80 g";
+                    }
+                    $doc->setField('assyr_poids', $interval);
+                } else {
+                    echo "Erreur lors de l'indexation  : \"<b>".$value."</b>\" est un poids invalide (<a target='_blank' href='".admin_url('/items/show/'.$item->id)."'>sceau #$item->id</a>)<br />";
+                }
+                
             } 
+
+            $prefix = 'Thickness :';
+            if (substr($value, 0, strlen($prefix)) == $prefix) {
+
+                $value = trim(ucfirst(str_replace($prefix, '', $value)));
+                $value = trim(str_replace(' mm', '', $value));
+                $value = trim(str_replace(' m', '', $value));
+
+                if (is_numeric($value)) {
+                    $interval = null;
+                    if ($value >= 2 && $value <= 4) {
+                        $interval = "2-4 mm";
+                    } elseif ($value >= 5 && $value <= 6) {
+                        $interval = "5-6 mm";
+                    } elseif ($value >= 7 && $value <= 9) {
+                        $interval = "7-9 mm";
+                    } elseif ($value > 10 ) {
+                        $interval = "> 9 mm";
+                    }
+                    $doc->setField('assyr_poids', $interval);
+                    $doc->setField('assyr_diametre_perfore', $interval);
+                } else {
+                    echo "Erreur lors de l'indexation  : \"<b>".$value."</b>\" est un diamètre perforé invalide (<a target='_blank' href='".admin_url('/items/show/'.$item->id)."'>sceau #$item->id</a>)<br />";
+                }
+
+            }             
         }
 
         // Thème iconographique : tous les DC:Subject qui commencent par "Subgenre remarks :"
