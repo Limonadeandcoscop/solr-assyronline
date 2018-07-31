@@ -105,7 +105,11 @@ class SolrSearch_Helpers_Index
         $prefix = "Period remarks :";
         foreach($values as $value) {
             if (substr($value, 0, strlen($prefix)) == $prefix) {
-                $doc->setField('assyr_periode',  trim(ucfirst(str_replace($prefix, '', $value))));  
+                $value = trim(ucfirst(str_replace($prefix, '', $value)));
+                if (strpos($value, '(')) {
+                    $value = trim(substr($value, 0, strpos($value, '(')));
+                }
+                $doc->setField('assyr_periode',  $value);
             }
         }
 
