@@ -164,7 +164,7 @@ class SolrSearchField extends Omeka_Record_AbstractRecord
      *
      * @return string The facet label.
      */
-    public function beforeSave()
+    public function beforeSave($args = array())
     {
         $label = trim($this->label);
         if (empty($label)) $this->label = $this->getOriginalLabel();
