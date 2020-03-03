@@ -73,24 +73,36 @@ class SolrSearch_ResultsController
 
         // Ordering results
         $orders['assyr_hauteur'] = array('1-9 mm', '10-19 mm', '20-29 mm', '30-49 mm', '50-55 mm', '> 55m');
-        $orders['assyr_diametre'] = array('4-9 mm', '10-14 mm', '15-19 mm', '20-24 mm', '25-29 mm', '30-34 mm', '> 34mm');        
+        $orders['assyr_diametre'] = array('4-9 mm', '10-14 mm', '15-19 mm', '20-24 mm', '25-29 mm', '30-34 mm', '> 34mm');
         $orders['assyr_poids'] = array("1-9 g", "10-19 g", "20-29 g", "30-39 g", "40-49 g", "50-59 g", "60-80 g", "> 80 g");
         $orders['assyr_diametre_perfore'] = array("2-4 mm", "5-6 mm", "7-9 mm", "> 9 mm");
+        $orders['assyr_periode'] = array("Uruk et Jemdet Nasr", "Cités-États", "Akkad et Ur III", "Époque amorrite", "Bronze Récent", "Empires assyrien et babylonien", "Époque perse", "Époque hellénistique", "Indéterminée");
 
         foreach ($results->facet_counts->facet_fields as $name => $f) {
-            
+
             if (array_key_exists($name, $orders)) {
                 foreach($orders[$name] as $key) {
                     if (@count($results->facet_counts->facet_fields->{$name}->{$key}))
-                        @$facets[$name]->{$key}   = $results->facet_counts->facet_fields->{$name}->{$key};    
+                        @$facets[$name]->{$key}   = $results->facet_counts->facet_fields->{$name}->{$key};
                 }
-                $results->facet_counts->facet_fields->{$name} = $facets[$name];    
+                $results->facet_counts->facet_fields->{$name} = $facets[$name];
             } else {
-                $results->facet_counts->facet_fields->{$name} = $f;    
+                echo '<pre>';
+                $sort = array();
+                foreach($f as $k => $v) {
+                    $sort[ucfirst($k)] = $v;
+                }
+                setlocale(LC_COLLATE, 'fr_FR.utf8');
+
+                ksort($sort, SORT_LOCALE_STRING);
+                $sort = (object) $sort;
+                $results->facet_counts->facet_fields->{$name} = $sort;
             }
-           
+
         }
-        
+
+
+
         // Push results to the view.
         $this->view->results = $results;
 
@@ -115,6 +127,11 @@ class SolrSearch_ResultsController
 
         // Construct the query.
         $query = $this->_getQuery($limitToPublicItems);
+
+        if (!strlen(trim($this->_request->q))) {
+            $params['sort'] = "assyr_pid asc";
+         //   print_r($params);
+        }
 
         // Execute the query.
         return $solr->search($query, $offset, $limit, $params);
@@ -183,8 +200,7 @@ class SolrSearch_ResultsController
             'hl.snippets'         => get_option('solr_search_hl_snippets'),
             'hl.fragsize'         => get_option('solr_search_hl_fragsize'),
             'hl.maxAnalyzedChars' => get_option('solr_search_hl_max_analyzed_chars'),
-            'hl.fl'               => '*_t'
-
+            'hl.fl'               => '*_t',
         );
 
     }

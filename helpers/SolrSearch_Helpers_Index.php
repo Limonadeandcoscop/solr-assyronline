@@ -87,17 +87,28 @@ class SolrSearch_Helpers_Index
 
         /*** Facettes Assyr ***/
 
+        // PID : le champ DC:Identifier
+        $Identifier = metadata($item, array('Dublin Core', 'Identifier'));
+        $doc->setField('assyr_pid', $Identifier);
+
         // Collection : le champ DC:Publisher
         $publisher = metadata($item, array('Dublin Core', 'Publisher'));
-        $doc->setField('assyr_collection', $publisher);  
+        $doc->setField('assyr_collection', $publisher);
 
         // Sous-collection : toutes les DC:Provenance ne commencant pas par "Acquisition history :"
+        /*
         $values = metadata($item, array('Dublin Core', 'Provenance'), array('all' => true));
         $prefix = "Acquisition history :";
         foreach($values as $value) {
             if (substr($value, 0, strlen($prefix)) != $prefix) {
-                $doc->setField('assyr_souscollection', trim(ucfirst($value)));  
+                $value = str_replace('Collection', '', $value);
+                $value = str_replace('collection', '', $value);
+                $doc->setField('assyr_souscollection', trim(ucfirst($value)));
             }
+        }
+        */
+        if ($collection = $item->getCollection()) {
+            $doc->setField('assyr_souscollection', trim(ucfirst($collection->getProperty('display_title'))));
         }
 
         // Période historique : toutes les DC:Temporal Coverage qui commencent par "Period remarks :"
@@ -118,14 +129,14 @@ class SolrSearch_Helpers_Index
         $prefix = "Provenience remarks :";
         foreach($values as $value) {
             if (substr($value, 0, strlen($prefix)) == $prefix) {
-                $doc->setField('assyr_aire',  trim(ucfirst(str_replace($prefix, '', $value))));  
+                $doc->setField('assyr_aire',  trim(ucfirst(str_replace($prefix, '', $value))));
             }
         }
 
         // Matériau : toutes les DC:Medium
         $value = metadata($item, array('Dublin Core', 'Medium'));
         if (strlen(trim($value))) {
-            $doc->setField('assyr_materiau', trim(ucfirst($value)));  
+            $doc->setField('assyr_materiau', trim(ucfirst($value)));
         }
 
         // Hauteur, diamètre et poids : toutes les DC:Format qui commencent par "Height :", "Width :" et "Weight :"
@@ -155,11 +166,11 @@ class SolrSearch_Helpers_Index
                     } elseif ($value >= 55 ) {
                         $interval = "> 55mm";
                     }
-                    $doc->setField('assyr_hauteur', $interval);  
+                    $doc->setField('assyr_hauteur', $interval);
                 } else {
                     echo "Erreur lors de l'indexation  : \"<b>".$value."</b>\" est une hauteur invalide (<a target='_blank' href='".admin_url('/items/show/'.$item->id)."'>sceau #$item->id</a>)<br />";
                 }
-            } 
+            }
 
             $prefix = 'Width :';
             if (substr($value, 0, strlen($prefix)) == $prefix) {
@@ -178,9 +189,9 @@ class SolrSearch_Helpers_Index
                     } elseif ($value >= 20 && $value <= 24) {
                         $interval = "20-24 mm";
                     } elseif ($value >= 25 && $value <= 29) {
-                        $interval = "25-29 mm";                        
+                        $interval = "25-29 mm";
                     } elseif ($value >= 30 && $value <= 34) {
-                        $interval = "30-34 mm";                                                
+                        $interval = "30-34 mm";
                     } elseif ($value >= 34 ) {
                         $interval = "> 34mm";
                     }
@@ -188,8 +199,8 @@ class SolrSearch_Helpers_Index
                 } else {
                     echo "Erreur lors de l'indexation  : \"<b>".$value."</b>\" est une largeur invalide (<a target='_blank' href='".admin_url('/items/show/'.$item->id)."'>sceau #$item->id</a>)<br />";
                 }
-                
-            } 
+
+            }
 
             $prefix = 'Weight :';
             if (substr($value, 0, strlen($prefix)) == $prefix) {
@@ -208,11 +219,11 @@ class SolrSearch_Helpers_Index
                     } elseif ($value >= 30 && $value <= 39) {
                         $interval = "30-39 g";
                     } elseif ($value >= 40 && $value <= 49) {
-                        $interval = "40-49 g";                        
+                        $interval = "40-49 g";
                     } elseif ($value >= 50 && $value <= 59) {
-                        $interval = "50-59 g";                                                
+                        $interval = "50-59 g";
                     } elseif ($value >= 60 && $value <= 80) {
-                        $interval = "60-80 g";                                                                        
+                        $interval = "60-80 g";
                     } elseif ($value >= 81 ) {
                         $interval = "> 80 g";
                     }
@@ -220,8 +231,8 @@ class SolrSearch_Helpers_Index
                 } else {
                     echo "Erreur lors de l'indexation  : \"<b>".$value."</b>\" est un poids invalide (<a target='_blank' href='".admin_url('/items/show/'.$item->id)."'>sceau #$item->id</a>)<br />";
                 }
-                
-            } 
+
+            }
 
             $prefix = 'Thickness :';
             if (substr($value, 0, strlen($prefix)) == $prefix) {
@@ -247,7 +258,7 @@ class SolrSearch_Helpers_Index
                     echo "Erreur lors de l'indexation  : \"<b>".$value."</b>\" est un diamètre perforé invalide (<a target='_blank' href='".admin_url('/items/show/'.$item->id)."'>sceau #$item->id</a>)<br />";
                 }
 
-            }             
+            }
         }
 
         // Thème iconographique : tous les DC:Subject qui commencent par "Subgenre remarks :"
@@ -256,12 +267,12 @@ class SolrSearch_Helpers_Index
         $prefix = "Subgenre remarks :";
         foreach($values as $value) {
             if (substr($value, 0, strlen($prefix)) == $prefix) {
-                $doc->setField('assyr_icono', trim(ucfirst(str_replace($prefix, '', $value))));  
+                $doc->setField('assyr_icono', trim(ucfirst(str_replace($prefix, '', $value))));
             } else {
-                $doc->setMultiValue('assyr_motscles', trim(ucfirst($value)));  
+                $doc->setMultiValue('assyr_motscles', trim(ucfirst($value)));
             }
         }
-        
+
 
 
         // extend $doc to to include and items public / private status
